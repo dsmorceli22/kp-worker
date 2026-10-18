@@ -1,0 +1,27 @@
+KangaPool worker v3.3.7 por série (Linux x86_64, para os templates da vast.ai)
+===============================================================================
+
+kangapool-worker-rtx20  -> RTX série 2000 (sm_75)
+kangapool-worker-rtx30  -> RTX série 3000 (sm_86)
+kangapool-worker-rtx40  -> RTX série 4000 (sm_89)
+kangapool-worker-rtx50  -> RTX série 5000 (sm_120)
+
+Cada arquivo é um executável único com DOIS motores embutidos, compilados para a série:
+  - CUDACyclone-kp1 (o CUDACyclone corrigido da KangaPool: não pula chaves, aceita qualquer faixa)
+  - KeyHunt-Cuda v1.07-kp1
+
+Na primeira execução eles são extraídos para ./CUDACyclone/ e ./KeyHunt-Cuda/ ao lado do worker.
+
+Requisitos: driver NVIDIA 580+ (CUDA 13), glibc 2.30+ (Ubuntu 20.04 ou mais novo) e servidor KangaPool v3.3.7.
+
+Uso nos templates do Vast Painel (feito sozinho pelo script de início):
+  ./kangapool-worker-rtx30 --server ws://... --token ... --backend cudacyclone --gpu-device all --gpu-selftest
+     -> se passar: --backend cudacyclone ; se não: --backend keyhuntcuda
+
+Compilação:
+  - CUDACyclone-kp: motores/CUDACyclone/fonte da KangaPool v3.3.7, nvcc 13.0, Ubuntu 20.04 (g++ 9),
+    -O3 -rdc=true -use_fast_math, um -gencode por série, cudart estático.
+  - Worker: cargo zigbuild (glibc 2.31) com KP_KEYHUNT_EMBUTIDO, KP_CYCLONE_EMBUTIDO e KP_KEYHUNT_ARCH.
+    A mudança no worker está em kp-worker-337-motores-embutidos.patch.
+
+Conferir: sha256sum -c SHA256SUMS-v3.3.7.txt
